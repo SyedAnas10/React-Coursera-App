@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import { Dishes } from "../shared/dishes";
 import Menu from "./MenuComponent";
-import DishDetail from "./dishDetailComponent";
 import Navigation from "./NavComponent";
+import Footer from "./FooterComponent";
+import { Switch, Route, Redirect } from "react-router-dom";
+import Home from "./HomeComponent";
 
 class Main extends Component{
 
@@ -10,21 +12,20 @@ class Main extends Component{
         super(props);
 
         this.state = {
-            dishes: Dishes,
-            selectedDish: null
+            dishes: Dishes
         };
-    }
-
-    onDishSelect(dish){
-        this.setState({selectedDish: dish});
     }
 
     render(){
         return(
             <div>
                 <Navigation />
-                <Menu dishes={this.state.dishes} onClick={(dish) => {this.onDishSelect(dish)}}/>
-                <DishDetail dish={this.state.selectedDish}/>
+                <Switch>
+                    <Route path="/home" component={() => <Home />} />
+                    <Route path="/menu" component={() => <Menu dishes={this.state.dishes} />} />
+                    <Redirect to="/home" />
+                </Switch>
+                <Footer />
             </div>
         );
     }
