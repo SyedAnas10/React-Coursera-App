@@ -31,7 +31,7 @@ class SubmitComment extends Component{
 
                 <Modal isOpen={this.state.commentBoxOpen} toggle={() => this.toggler()}>
                     <ModalHeader>Submit Comment</ModalHeader>
-                    <LocalForm onSubmit={(values) => alert(JSON.stringify(values))}>
+                    <LocalForm onSubmit={(values) => {this.toggler(); alert(JSON.stringify(values))} }>
                         <Row className="form-group ml-1">
                             <Col md={11}>
                                 <Label htmlFor="rating">Rating :</Label>
