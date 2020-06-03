@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import { Card, CardBody, CardTitle, CardText, CardImg, Modal, Row, Label, Button, ModalHeader, Col} from "reactstrap";
+import { Redirect } from "react-router-dom";
 import { LocalForm, Control, Errors } from "react-redux-form";
+import { Loading } from "./LoadingComponent";
+import { baseUrl } from "../shared/baseUrl";
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -18,8 +21,11 @@ class SubmitComment extends Component{
         this.toggler = this.toggler.bind(this);
     }
 
-    toggler() {
-        this.setState({commentBoxOpen: !this.state.commentBoxOpen})
+    toggler(values) {
+        this.setState({commentBoxOpen: !this.state.commentBoxOpen});
+        alert(JSON.stringify(values));
+        this.props.addComment(this.props.dishId, values.rating, values.author, values.comment);
+        return <Redirect to="http://localhost:3000/home"/>
     }
 
     render(){
@@ -31,7 +37,7 @@ class SubmitComment extends Component{
 
                 <Modal isOpen={this.state.commentBoxOpen} toggle={() => this.toggler()}>
                     <ModalHeader>Submit Comment</ModalHeader>
-                    <LocalForm onSubmit={(values) => {this.toggler(); alert(JSON.stringify(values))} }>
+                    <LocalForm onSubmit={(values) => {this.toggler(values)} }>
                         <Row className="form-group ml-1">
                             <Col md={11}>
                                 <Label htmlFor="rating">Rating :</Label>
@@ -47,13 +53,13 @@ class SubmitComment extends Component{
                         </Row>
                         <Row className="form-group ml-2">
                             <Col md={11}>
-                            <Label htmlFor="username">Username :</Label>
-                            <Control.text model=".username" name="username" id="username"
+                            <Label htmlFor="author">Username :</Label>
+                            <Control.text model=".author" name="author" id="author"
                             className="form-control" 
                             validators={
                                 {required, minLength: minLength(3), maxLength: maxLength(15)}
                             }/>
-                            <Errors className="text-danger" model=".username" show="touched"
+                            <Errors className="text-danger" model=".author" show="touched"
                             messages={
                                 {required: 'Required! ',
                                 minLength: 'Must be greater than 2 charachters.',
@@ -82,7 +88,7 @@ function RenderDish({dish}) {
     if (dish != null) {
         return(
             <Card>
-                <CardImg top src={dish.image} alt={dish.name} />
+                <CardImg top src={baseUrl + dish.image} alt={dish.name} />
                 <CardBody>
                     <CardTitle className="h4">{dish.name}</CardTitle>
                     <CardText>{dish.description}</CardText>
@@ -97,7 +103,7 @@ function RenderDish({dish}) {
     }
 }
 
-function RenderComments({comments}) {
+function RenderComments({comments, addComment, dishId}) {
     if(comments != null){
         const com = comments.map((com) => {
         return(
@@ -114,7 +120,7 @@ function RenderComments({comments}) {
                 <div className="m-1">
                     {com}
                 </div> 
-                <SubmitComment />
+                <SubmitComment dishId={dishId} addComment={addComment}/>
             </div>
         )
         }
@@ -135,6 +141,24 @@ class DishDetail extends Component {
     }
     
     render(){
+        if (this.props.isLoading) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <Loading />
+                    </div>
+                </div>
+            );
+        }
+        else if (this.props.errMess) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <h4>{this.props.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }
         if (this.props.dish != null) {
             return(
                 <div className="container">
@@ -145,7 +169,7 @@ class DishDetail extends Component {
                         <div className="col-6 m-1">
                             <Card>
                                 <CardBody>
-                                    <RenderComments comments={this.props.dish.comments} />
+                                    <RenderComments comments={this.props.dish.comments} addComment={this.props.addComment} dishId={this.props.dish.id} />
                                 </CardBody>
                             </Card> 
                         </div>
